@@ -30,11 +30,13 @@ def prepTrainingData():
 
     #replacing the species with a number/categorising them
     Ports = list(enumerate(np.unique(train_df['species'])))    # determine all values of species,
+    name_sorted.append('id')
     for i,name in Ports:
         name_sorted.append(name)
-    name_sorted.sort() #storing the species name in sorted order
-    print name_sorted
-    
+
+    name_sorted[1:]=sorted(name_sorted[1:])
+    #print name_sorted
+
     Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
 
     train_df.species = train_df.species.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
@@ -102,6 +104,8 @@ def TestArea(algo_str,X_train,y_train,X_test):
     ids=np.reshape(ids,(594,1))
     print ids.shape
     predictions_file = open("leaf_classification.csv", "wb")
+
+    '''
     open_file_object = csv.writer(predictions_file)
     new_name=[]
     new_name.append('id')
@@ -116,7 +120,15 @@ def TestArea(algo_str,X_train,y_train,X_test):
     outpu=np.concatenate((new_name,output),axis=0)
     np.savetxt("foo.csv",output, delimiter=",")
     #open_file_object.writerows(zip(ids, output))
-    open_file_object.writerows(zip(ids,[i for i in output]))                             
+    open_file_object.writerows(zip(ids,[i for i in output])) 
+    '''
+
+    open_file_object = csv.writer(predictions_file,quoting = csv.QUOTE_MINIMAL,lineterminator='\n')
+    open_file_object.writerow(name_sorted)
+    
+    
+    #open_file_object.writerows(zip(ids, output))
+
     predictions_file.close()
     print 'Done.'
 
