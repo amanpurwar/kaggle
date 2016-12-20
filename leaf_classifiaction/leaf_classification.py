@@ -30,7 +30,8 @@ def prepTrainingData():
     #replacing the species with a number/categorising them
     Ports = list(enumerate(np.unique(train_df['species'])))    # determine all values of species,
     Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
-    train_df.Embarked = train_df.Embarked.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
+    train_df.species = train_df.species.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
+    print(Ports_dict)
 
     train_data=train_df.values
 
@@ -40,10 +41,6 @@ def prepareTestData():
     global Ports_dict,ids
     #test data file load
     test_df=pd.read_csv('test.csv',header=0)
-
-    
-    #convert all the species into int from string
-    test_df.species=test_df.species.map( lambda x: Ports_dict[x]).astype(int)
 
     ids=test_df['id'].values # collecting id of test data before dropping id field
     test_df=test_df.drop('id',axis=1)
@@ -100,7 +97,10 @@ def TestArea(algo_str,X_train,y_train,X_test):
     open_file_object.writerows(zip(ids, output))
     predictions_file.close()
     print 'Done.'
-
+if __name__ == '__main__':
+    X_train, y_train = prepTrainingData()
+    X_test = prepareTestData()
+    #TestArea('xgboost', X_train, y_train, X_test)
 
 
     
