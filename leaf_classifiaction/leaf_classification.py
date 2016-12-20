@@ -30,6 +30,7 @@ def prepTrainingData():
     #replacing the species with a number/categorising them
     Ports = list(enumerate(np.unique(train_df['species'])))    # determine all values of species,
     Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
+
     print Ports_dict
     train_df.species = train_df.species.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
 
@@ -41,10 +42,6 @@ def prepareTestData():
     global Ports_dict,ids
     #test data file load
     test_df=pd.read_csv('test.csv',header=0)
-
-    
-    #convert all the species into int from string
-    test_df.species=test_df.species.map( lambda x: Ports_dict[x]).astype(int)
 
     ids=test_df['id'].values # collecting id of test data before dropping id field
     test_df=test_df.drop('id',axis=1)
