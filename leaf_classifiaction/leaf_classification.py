@@ -32,8 +32,9 @@ def prepTrainingData():
     Ports = list(enumerate(np.unique(train_df['species'])))    # determine all values of species,
     for i,name in Ports:
         name_sorted.append(name)
-    name_sorted.sort()
+    name_sorted.sort() #storing the species name in sorted order
     print name_sorted
+    
     Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
 
     train_df.species = train_df.species.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
@@ -56,6 +57,7 @@ def prepareTestData():
     return test_data
 
 def TestArea(algo_str,X_train,y_train,X_test):
+    global ids
     print 'testing started...'
     if algo_str is "rforest":
         forest = RandomForestClassifier(n_estimators=250,criterion='entropy',min_samples_split=5,max_features='sqrt')
@@ -96,11 +98,25 @@ def TestArea(algo_str,X_train,y_train,X_test):
     #output = clf.predict(X_test).astype(int)
     output = clf.predict_proba(X_test)
     print output.shape
+    print ids
+    ids=np.reshape(ids,(594,1))
+    print ids.shape
     predictions_file = open("leaf_classification.csv", "wb")
     open_file_object = csv.writer(predictions_file)
-    open_file_object.writerow("id","species")
-    #open_file_object.writerow(["id",[i for i in ])
-    open_file_object.writerows(zip(ids, output))
+    new_name=[]
+    new_name.append('id')
+    for i in name_sorted:
+        new_name.append(i)
+    #print new_name.shape()
+    open_file_object.writerows(zip("id",name_sorted))
+    #open_file_object.writerow(["id",[i for i in name_sorted]])
+    #open_file_object.writerow("id")
+    output=np.concatenate((ids, output), axis=1)
+    print output.shape
+    outpu=np.concatenate((new_name,output),axis=0)
+    np.savetxt("foo.csv",output, delimiter=",")
+    #open_file_object.writerows(zip(ids, output))
+    open_file_object.writerows(zip(ids,[i for i in output]))                             
     predictions_file.close()
     print 'Done.'
 
