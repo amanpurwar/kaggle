@@ -18,6 +18,7 @@ from imblearn.over_sampling import SMOTE
 # global variables
 Ports_dict = {}
 ids=None
+name_sorted=[]
 
 def prepTrainingData():
     global ids
@@ -29,11 +30,14 @@ def prepTrainingData():
 
     #replacing the species with a number/categorising them
     Ports = list(enumerate(np.unique(train_df['species'])))    # determine all values of species,
+    for i,name in Ports:
+        name_sorted.append(name)
+    name_sorted.sort()
+    print name_sorted
     Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
 
-    print Ports_dict
     train_df.species = train_df.species.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
-
+    
     train_data=train_df.values
 
     return train_data[:,1:],train_data[:,0]
@@ -54,7 +58,7 @@ def prepareTestData():
 def TestArea(algo_str,X_train,y_train,X_test):
     print 'testing started...'
     if algo_str is "rforest":
-        forest = RandomForestClassifier(n_estimators=250,criterion='entropy',min_samples_split=10,max_features=4)
+        forest = RandomForestClassifier(n_estimators=250,criterion='entropy',min_samples_split=5,max_features='sqrt')
         forest = forest.fit( X_train, y_train )
         #for printing the importances
         '''
@@ -89,20 +93,21 @@ def TestArea(algo_str,X_train,y_train,X_test):
         
 
     print 'Predicting...'
-    output = clf.predict(X_test).astype(int)
-
-
+    #output = clf.predict(X_test).astype(int)
+    output = clf.predict_proba(X_test)
+    print output.shape
     predictions_file = open("leaf_classification.csv", "wb")
     open_file_object = csv.writer(predictions_file)
-    open_file_object.writerow(["id","Species"])
+    open_file_object.writerow("id","species")
+    #open_file_object.writerow(["id",[i for i in ])
     open_file_object.writerows(zip(ids, output))
     predictions_file.close()
     print 'Done.'
 
 if __name__ == '__main__':
     X_train,y_train = prepTrainingData()
-    #X_test = prepareTestData()
-    #TestArea('rforest',X_train,y_train,X_test)
+    X_test = prepareTestData()
+    TestArea('rforest',X_train,y_train,X_test)
 
 
     
