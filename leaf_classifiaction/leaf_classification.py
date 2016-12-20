@@ -122,10 +122,11 @@ def TestArea(algo_str,X_train,y_train,X_test):
     #open_file_object.writerows(zip(ids, output))
     open_file_object.writerows(zip(ids,[i for i in output])) 
     '''
-
+ 
+    output=np.concatenate((ids, output), axis=1)
     open_file_object = csv.writer(predictions_file,quoting = csv.QUOTE_MINIMAL,lineterminator='\n')
     open_file_object.writerow(name_sorted)
-    
+    open_file_object.writerows( output)
     
     #open_file_object.writerows(zip(ids, output))
 
