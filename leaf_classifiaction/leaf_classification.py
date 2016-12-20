@@ -30,7 +30,8 @@ def prepTrainingData():
     #replacing the species with a number/categorising them
     Ports = list(enumerate(np.unique(train_df['species'])))    # determine all values of species,
     Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
-    train_df.Embarked = train_df.Embarked.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
+    print Ports_dict
+    train_df.species = train_df.species.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
 
     train_data=train_df.values
 
@@ -101,6 +102,10 @@ def TestArea(algo_str,X_train,y_train,X_test):
     predictions_file.close()
     print 'Done.'
 
+if __name__ == '__main__':
+    X_train,y_train = prepTrainingData()
+    #X_test = prepareTestData()
+    #TestArea('rforest',X_train,y_train,X_test)
 
 
     
