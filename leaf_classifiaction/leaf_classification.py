@@ -14,6 +14,8 @@ from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
 from xgboost.sklearn import XGBClassifier
 from imblearn.over_sampling import SMOTE
+from  numpy.lib.recfunctions import append_fields
+from sklearn.feature_selection import SelectKBest
 
 # global variables
 Ports_dict = {}
@@ -62,8 +64,12 @@ def TestArea(algo_str,X_train,y_train,X_test):
     global ids
     print 'testing started...'
     if algo_str is "rforest":
-        forest = RandomForestClassifier(n_estimators=250,criterion='entropy',min_samples_split=5,max_features='sqrt')
-        forest = forest.fit( X_train, y_train )
+        clf_kbest=SelectKBest(k=150)
+        clf_kbest=clf_kbest.fit(X_train,y_train)
+        X_train_new=clf_kbest.transform(X_train)
+        X_test=clf_kbest.transform(X_test)
+        forest = RandomForestClassifier(n_estimators=400,criterion='entropy',min_samples_split=7,max_features=0.5)
+        forest = forest.fit( X_train_new, y_train )
         #for printing the importances
         '''
         importances = forest.feature_importances_
@@ -103,7 +109,7 @@ def TestArea(algo_str,X_train,y_train,X_test):
     print ids
     ids=np.reshape(ids,(594,1))
     print ids.shape
-    predictions_file = open("leaf_classification.csv", "wb")
+    predictions_file = open("output.csv", "wb")
 
     '''
     open_file_object = csv.writer(predictions_file)
@@ -122,11 +128,16 @@ def TestArea(algo_str,X_train,y_train,X_test):
     #open_file_object.writerows(zip(ids, output))
     open_file_object.writerows(zip(ids,[i for i in output])) 
     '''
- 
+    
+    #for i in range(0,len(ids)):
+    #    ids[i]=ids[i].astype('int32')
+    #id = np.rec.array(output, dtype=[('id', np.int64)])
+    #new_a = append_fields(id,'output', output, usemask=False, dtypes=[np.float64])
+    
     output=np.concatenate((ids, output), axis=1)
     open_file_object = csv.writer(predictions_file,quoting = csv.QUOTE_MINIMAL,lineterminator='\n')
     open_file_object.writerow(name_sorted)
-    open_file_object.writerows( output)
+    open_file_object.writerows(output)
     
     #open_file_object.writerows(zip(ids, output))
 
