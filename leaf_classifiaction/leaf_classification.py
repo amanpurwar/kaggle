@@ -16,14 +16,16 @@ from xgboost.sklearn import XGBClassifier
 from imblearn.over_sampling import SMOTE
 from  numpy.lib.recfunctions import append_fields
 from sklearn.feature_selection import SelectKBest
+import matplotlib.pyplot as plt
 
 # global variables
 Ports_dict = {}
 ids=None
 name_sorted=[]
+clf_kbest=SelectKBest(k=176)
 
 def prepTrainingData():
-    global ids
+    global ids,clf_kbest
     #loading data into dataframe
     train_df = pd.read_csv('train.csv', header=0)
 
@@ -41,22 +43,28 @@ def prepTrainingData():
 
     Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
 
+ 
+
     train_df.species = train_df.species.map( lambda x: Ports_dict[x]).astype(int)     # Convert all species strings to int
     
     train_data=train_df.values
+    clf_kbest=clf_kbest.fit(train_data[:,1:],train_data[:,0])
+    train_data_X=clf_kbest.transform(train_data[:,1:])
 
-    return train_data[:,1:],train_data[:,0]
+    return train_data_X,train_data[:,0]
 
 def prepareTestData():
-    global Ports_dict,ids
+    global Ports_dict,ids,clf_kbest
     #test data file load
     test_df=pd.read_csv('test.csv',header=0)
-
+    
     ids=test_df['id'].values # collecting id of test data before dropping id field
     test_df=test_df.drop('id',axis=1)
+    
 
     #converting to numpy arr
     test_data=test_df.values
+    test_data=clf_kbest.transform(test_data)
 
     return test_data
 
@@ -64,18 +72,22 @@ def TestArea(algo_str,X_train,y_train,X_test):
     global ids
     print 'testing started...'
     if algo_str is "rforest":
-        clf_kbest=SelectKBest(k=150)
-        clf_kbest=clf_kbest.fit(X_train,y_train)
-        X_train_new=clf_kbest.transform(X_train)
-        X_test=clf_kbest.transform(X_test)
+        
         forest = RandomForestClassifier(n_estimators=400,criterion='entropy',min_samples_split=7,max_features=0.5)
-        forest = forest.fit( X_train_new, y_train )
+        forest = forest.fit( X_train, y_train )
         #for printing the importances
         '''
         importances = forest.feature_importances_
         indices = np.argsort(importances)[::-1]
-        for f in range(0,5):
+        std = np.std([tree.feature_importances_ for tree in forest.estimators_],
+            axis=0)
+        for f in range(0,176):
             print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+        plt.figure()
+        plt.title("Feature importances")
+        plt.bar(range(0,176), importances[indices],
+        color="r", yerr=indices, align="center")
+        plt.show()
         '''
         
         clf=forest
