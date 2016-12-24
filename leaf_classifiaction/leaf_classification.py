@@ -3,6 +3,7 @@ Author : NaHopayega
 Date: 20th dec 2016
 
 """
+import pdb
 import pandas as pd
 import numpy as np
 import random
@@ -17,15 +18,62 @@ from imblearn.over_sampling import SMOTE
 from  numpy.lib.recfunctions import append_fields
 from sklearn.feature_selection import SelectKBest
 import matplotlib.pyplot as plt
+import os
+import cv2
 
 # global variables
 Ports_dict = {}
 ids=None
 name_sorted=[]
 clf_kbest=SelectKBest(k=176)
+image_path = '/images/'
+
+"""
+Returns two numpy arrays,
+X_train_images = [
+[ Pixel values of image 1 ],
+[ Pixel values of image 2 ],
+...
+]
+
+id_images = [
+110,
+11,
+]
+
+Above matrix is the ID corresponding to each image.
+"""
+def getImages():
+    curr_path = os.getcwd()
+    images_path = curr_path + image_path
+
+    files = [f for f in os.listdir(images_path)]
+    test = cv2.imread('images/'+files[0]).ravel()
+
+    # Using the shape of the first image to set the row and col size
+    R = max(test.shape)
+
+    pdb.set_trace()
+
+    # Gives a memory error, what do we do now?
+    X_train_images = np.zeros((len(files), R))
+    id_images = np.array(R)
+
+    X_train_images[0, :] = test
+    id_images[0] = int(f[0][:-4])
+
+    for idx, f in enumerate(files[1:]):
+        # For each image, pull out the pixels, ravel and stack em up
+        image = cv2.imread('images/'+f).ravel()
+        X_train_images[idx+1, :] = image
+        id_images[idx+1] = int(f[:-4])
+
+    return X_train_images, id_images
 
 def prepTrainingData():
     global ids,clf_kbest
+    getImages()
+    pdb.set_trace()
     #loading data into dataframe
     train_df = pd.read_csv('train.csv', header=0)
 
